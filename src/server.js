@@ -89,7 +89,6 @@ app.get('*', async (req, res) => {
   );
 });
   
-
 (async () => {
   try {
     global.webpackIsomorphicTools = 
