@@ -36,7 +36,7 @@ const WARN_AFTER_BUNDLE_GZIP_SIZE = 512 * 1024;
 const WARN_AFTER_CHUNK_GZIP_SIZE = 1024 * 1024;
 
 // Warn and crash if required files are missing
-if (!checkRequiredFiles([paths.appHtml, paths.appIndexJs])) {
+if (!checkRequiredFiles([paths.appIndexJs])) {
   process.exit(1);
 }
 
@@ -49,6 +49,7 @@ measureFileSizesBeforeBuild(paths.appBuild)
     fs.emptyDirSync(paths.appBuild);
     // Merge with the public folder
     copyPublicFolder();
+    copyNonJsFilesRecursively(paths.appSrc, paths.appDist);
     // Start the webpack build
     return build(previousFileSizes);
   })
@@ -147,4 +148,27 @@ function copyPublicFolder() {
     dereference: true,
     filter: file => file !== paths.appHtml,
   });
+}
+
+function copyNonJsFilesRecursively(srcPath, dstPath) {
+  fs.readdirSync(srcPath, 'utf8').forEach(file => {
+    const srcFile = path.resolve(srcPath, file);
+    const distFile = path.resolve(dstPath, file);
+
+    if (fs.lstatSync(srcFile).isDirectory()) {
+      makeDirRecursivelyIfNotExists(distFile);
+
+      copyNonJsFilesRecursively(srcFile, distFile);
+    } else {
+      if (!/\.jsx?$/.test(file)) {
+        fs.copySync(srcFile, distFile);
+      }
+    }
+  })
+}
+
+function makeDirRecursivelyIfNotExists(dir) {
+  if (!fs.existsSync(dir)) {
+    fs.mkdirpSync(dir)
+  }
 }

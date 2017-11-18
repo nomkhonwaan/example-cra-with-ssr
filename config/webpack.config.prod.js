@@ -13,6 +13,13 @@ const ModuleScopePlugin = require('react-dev-utils/ModuleScopePlugin');
 const paths = require('./paths');
 const getClientEnvironment = require('./env');
 
+const WebpackIsomorphicToolsPlugin = require('webpack-isomorphic-tools/plugin');
+
+const webpackIsomorphicToolsPlugin = 
+  // webpack-isomorphic-tools settings reside in a separate .js file 
+  // (because they will be used in the web server code too).
+  new WebpackIsomorphicToolsPlugin(require('./webpack-isomorphic-tools-configuration'));
+
 // Webpack uses `publicPath` to determine where the app is being served from.
 // It requires a trailing slash, or the file assets will get an incorrect path.
 const publicPath = paths.servedPath;
@@ -56,7 +63,7 @@ module.exports = {
   // You can exclude the *.map files from the build during deployment.
   devtool: shouldUseSourceMap ? 'source-map' : false,
   // In production, we only want to load the polyfills and the app code.
-  entry: [require.resolve('./polyfills'), paths.appIndexJs],
+  entry: [require.resolve('./polyfills'), paths.appDistIndexJs],
   output: {
     // The build folder.
     path: paths.appBuild,
@@ -133,6 +140,10 @@ module.exports = {
         // match the requirements. When no loader matches it will fall
         // back to the "file" loader at the end of the loader list.
         oneOf: [
+          {
+            test: webpackIsomorphicToolsPlugin.regularExpression('images'),
+            loader: 'url-loader?limit=10240'
+          },
           // "url" loader works just like "file" loader but it also embeds
           // assets smaller than specified size as data URLs to avoid requests.
           {
@@ -239,24 +250,24 @@ module.exports = {
     // <link rel="shortcut icon" href="%PUBLIC_URL%/favicon.ico">
     // In production, it will be an empty string unless you specify "homepage"
     // in `package.json`, in which case it will be the pathname of that URL.
-    new InterpolateHtmlPlugin(env.raw),
+    // new InterpolateHtmlPlugin(env.raw),
     // Generates an `index.html` file with the <script> injected.
-    new HtmlWebpackPlugin({
-      inject: true,
-      template: paths.appHtml,
-      minify: {
-        removeComments: true,
-        collapseWhitespace: true,
-        removeRedundantAttributes: true,
-        useShortDoctype: true,
-        removeEmptyAttributes: true,
-        removeStyleLinkTypeAttributes: true,
-        keepClosingSlash: true,
-        minifyJS: true,
-        minifyCSS: true,
-        minifyURLs: true,
-      },
-    }),
+    // new HtmlWebpackPlugin({
+    //   inject: true,
+    //   template: paths.appHtml,
+    //   minify: {
+    //     removeComments: true,
+    //     collapseWhitespace: true,
+    //     removeRedundantAttributes: true,
+    //     useShortDoctype: true,
+    //     removeEmptyAttributes: true,
+    //     removeStyleLinkTypeAttributes: true,
+    //     keepClosingSlash: true,
+    //     minifyJS: true,
+    //     minifyCSS: true,
+    //     minifyURLs: true,
+    //   },
+    // }),
     // Makes some environment variables available to the JS code, for example:
     // if (process.env.NODE_ENV === 'production') { ... }. See `./env.js`.
     // It is absolutely essential that NODE_ENV was set to production here.
@@ -322,6 +333,7 @@ module.exports = {
       navigateFallbackWhitelist: [/^(?!\/__).*/],
       // Don't precache sourcemaps (they're large) and build asset manifest:
       staticFileGlobsIgnorePatterns: [/\.map$/, /asset-manifest\.json$/],
+      webpackIsomorphicToolsPlugin
     }),
     // Moment.js is an extremely popular library that bundles large locale files
     // by default due to how Webpack interprets its code. This is a practical

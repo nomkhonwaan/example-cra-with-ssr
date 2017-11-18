@@ -6,13 +6,46 @@ import React from 'react';
 import ReactDOMServer from 'react-dom/server';
 
 import App from './App';
+import paths from '../config/paths';
 
 const WebpackIsomorphicTools = require('webpack-isomorphic-tools');
 
 const app = express();
 const port = process.env.PORT || 8080;
+const assets = {
+  scripts: [
+    {
+      src: `${paths.publicUrl}static/js/bundle.js`
+    }
+  ],
+  styles: []
+};
 
-app.get('*', async (req, res, next) => {
+if (process.env.NODE_ENV === 'production') {
+  app.use(express.static(paths.appBuild));
+  
+  const manifest = require('../build/asset-manifest.json');
+
+  // Remove default development script
+  assets.scripts.pop();
+
+  Object.keys(manifest).reduce((bucket, key) => {
+    if (/\.css$/.test(key)) {
+      bucket.styles.push({
+        href: `${paths.publicUrl}${manifest[key]}`,
+        rel: 'stylesheet'
+      });
+    } else if (/\.js$/.test(key)) {
+      bucket.scripts.push({
+        src: `${paths.publicUrl}${manifest[key]}`
+      });
+    }
+
+    return bucket;
+  }, assets);
+}
+
+app.get('*', async (req, res) => {
   res.send(
     '<!DOCTYPE html>' + ReactDOMServer.renderToStaticMarkup(
       <html lang="en">
@@ -21,10 +54,17 @@ app.get('*', async (req, res, next) => {
           <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
           <meta name="theme-color" content="#000000" />
 
-          <link rel="manifest" href="http://localhost:3000/manifest.json" />
-          <link rel="shortcut icon" href="http://localhost:3000/favicon.ico" />
+          <link rel="manifest" href={`${paths.publicUrl}manifest.json`} />
+          <link rel="shortcut icon" href={`${paths.publicUrl}favicon.ico`} />
 
           <title>React App</title>
+
+          {
+            assets.styles.map(
+              (val, key) =>
+                <link key={key} rel={val.rel} href={val.href} />
+            )
+          }
         </head>
         <body>
           <noscript>
@@ -37,7 +77,12 @@ app.get('*', async (req, res, next) => {
             }}
           />
 
-          <script src="http://localhost:3000/static/js/bundle.js" />
+          {
+            assets.scripts.map(
+              (val, key) => 
+                <script key={key} src={val.src} />
+            )
+          }
         </body>
       </html>
     )
