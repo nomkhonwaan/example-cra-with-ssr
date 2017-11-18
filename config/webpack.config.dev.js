@@ -3,9 +3,9 @@
 const autoprefixer = require('autoprefixer');
 const path = require('path');
 const webpack = require('webpack');
-const HtmlWebpackPlugin = require('html-webpack-plugin');
+// const HtmlWebpackPlugin = require('html-webpack-plugin');
 const CaseSensitivePathsPlugin = require('case-sensitive-paths-webpack-plugin');
-const InterpolateHtmlPlugin = require('react-dev-utils/InterpolateHtmlPlugin');
+// const InterpolateHtmlPlugin = require('react-dev-utils/InterpolateHtmlPlugin');
 const WatchMissingNodeModulesPlugin = require('react-dev-utils/WatchMissingNodeModulesPlugin');
 const eslintFormatter = require('react-dev-utils/eslintFormatter');
 const ModuleScopePlugin = require('react-dev-utils/ModuleScopePlugin');
@@ -15,13 +15,8 @@ const paths = require('./paths');
 const WebpackIsomorphicToolsPlugin = require('webpack-isomorphic-tools/plugin');
 
 const webpackIsomorphicToolsPlugin = 
-  // webpack-isomorphic-tools settings reside in a separate .js file 
-  // (because they will be used in the web server code too).
   new WebpackIsomorphicToolsPlugin(require('./webpack-isomorphic-tools-configuration'))
-  // also enter development mode since it's a development webpack configuration
-  // (see below for explanation)
-  .development();
-
+    .development();
 
 // Webpack uses `publicPath` to determine where the app is being served from.
 // In development, we always serve from the root. This makes config easier.
@@ -58,7 +53,7 @@ module.exports = {
     // require.resolve('webpack/hot/dev-server'),
     require.resolve('react-dev-utils/webpackHotDevClient'),
     // Finally, this is your app's code:
-    paths.appIndexJs,
+    paths.appDistIndexJs,
     // We include the app code last so that if there is a runtime error during
     // initialization, it doesn't blow up the WebpackDevServer client, and
     // changing JS code would still trigger a refresh.

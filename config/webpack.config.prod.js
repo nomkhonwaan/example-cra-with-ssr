@@ -3,7 +3,7 @@
 const autoprefixer = require('autoprefixer');
 const path = require('path');
 const webpack = require('webpack');
-const HtmlWebpackPlugin = require('html-webpack-plugin');
+// const HtmlWebpackPlugin = require('html-webpack-plugin');
 const ExtractTextPlugin = require('extract-text-webpack-plugin');
 const ManifestPlugin = require('webpack-manifest-plugin');
 const InterpolateHtmlPlugin = require('react-dev-utils/InterpolateHtmlPlugin');
@@ -16,8 +16,6 @@ const getClientEnvironment = require('./env');
 const WebpackIsomorphicToolsPlugin = require('webpack-isomorphic-tools/plugin');
 
 const webpackIsomorphicToolsPlugin = 
-  // webpack-isomorphic-tools settings reside in a separate .js file 
-  // (because they will be used in the web server code too).
   new WebpackIsomorphicToolsPlugin(require('./webpack-isomorphic-tools-configuration'));
 
 // Webpack uses `publicPath` to determine where the app is being served from.
@@ -333,7 +331,6 @@ module.exports = {
       navigateFallbackWhitelist: [/^(?!\/__).*/],
       // Don't precache sourcemaps (they're large) and build asset manifest:
       staticFileGlobsIgnorePatterns: [/\.map$/, /asset-manifest\.json$/],
-      webpackIsomorphicToolsPlugin
     }),
     // Moment.js is an extremely popular library that bundles large locale files
     // by default due to how Webpack interprets its code. This is a practical
@@ -341,6 +338,7 @@ module.exports = {
     // https://github.com/jmblog/how-to-optimize-momentjs-with-webpack
     // You can remove this if you don't use Moment.js:
     new webpack.IgnorePlugin(/^\.\/locale$/, /moment$/),
+    webpackIsomorphicToolsPlugin    
   ],
   // Some libraries import Node modules but don't use them in the browser.
   // Tell Webpack to provide empty mocks for them so importing them works.
